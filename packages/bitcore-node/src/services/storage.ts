@@ -12,6 +12,7 @@ import { Config, ConfigService } from './config';
 import { Readable } from 'stream';
 import { MongoBound } from '../models/base';
 import { ObjectId } from 'bson';
+import * as fs from 'fs';
 
 export { StreamingFindOptions };
 
@@ -30,17 +31,22 @@ export class StorageService {
   start(args: Partial<ConfigType> = {}): Promise<MongoClient> {
     return new Promise((resolve, reject) => {
       let options = Object.assign({}, this.configService.get(), args);
-      let { dbName, dbHost, dbPort, dbUser, dbPass } = options;
+      let { dbName, dbHost, dbPort, dbUser, dbPass, dbSslCAPath } = options;
       let auth = dbUser !== '' && dbPass !== '' ? `${dbUser}:${dbPass}@` : '';
       const connectUrl = `mongodb://${auth}${dbHost}:${dbPort}/${dbName}?socketTimeoutMS=3600000&noDelay=true`;
+      const configObj = {
+        keepAlive: true,
+        poolSize: options.maxPoolSize,
+        useNewUrlParser: true
+      };
+      if (dbSslCAPath !== '') {
+        (configObj as any).sslValidate = true;
+        (configObj as any).sslCA = [fs.readFileSync(dbSslCAPath)];
+      }
       let attemptConnect = async () => {
         return MongoClient.connect(
           connectUrl,
-          {
-            keepAlive: true,
-            poolSize: options.maxPoolSize,
-            useNewUrlParser: true
-          }
+          configObj
         );
       };
       let attempted = 0;

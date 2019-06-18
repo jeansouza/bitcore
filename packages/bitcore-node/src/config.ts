@@ -59,6 +59,7 @@ const Config = function(): ConfigType {
     dbPort: process.env.DB_PORT || '27017',
     dbUser: process.env.DB_USER || '',
     dbPass: process.env.DB_PASS || '',
+    dbSslCAPath: process.env.DB_SSL_CA_PATH || '',
     numWorkers: cpus().length,
     chains: {},
     services: {

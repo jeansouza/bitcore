@@ -7,6 +7,7 @@ export interface ConfigType {
   dbUser: string;
   dbPass: string;
   numWorkers: number;
+  dbSslCAPath: string;
 
   chains: {
     [currency: string]: { [network: string]: any };
