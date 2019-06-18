@@ -33,7 +33,7 @@ export class StorageService {
       let options = Object.assign({}, this.configService.get(), args);
       let { dbName, dbHost, dbPort, dbUser, dbPass, dbSslCAPath } = options;
       let auth = dbUser !== '' && dbPass !== '' ? `${dbUser}:${dbPass}@` : '';
-      const connectUrl = `mongodb://${auth}${dbHost}:${dbPort}/${dbName}?socketTimeoutMS=3600000&noDelay=true`;
+      let connectUrl = `mongodb://${auth}${dbHost}:${dbPort}/${dbName}?socketTimeoutMS=3600000&noDelay=true`;
       const configObj = {
         keepAlive: true,
         poolSize: options.maxPoolSize,
@@ -42,6 +42,7 @@ export class StorageService {
       if (dbSslCAPath !== '') {
         (configObj as any).sslValidate = true;
         (configObj as any).sslCA = [fs.readFileSync(dbSslCAPath)];
+        connectUrl += '&ssl=true&replicaSet=rs0&readPreference=secondaryPreferred'
       }
       let attemptConnect = async () => {
         return MongoClient.connect(
